@@ -351,6 +351,7 @@
             font-weight: 400;
             opacity: 0;
             transition: opacity 0.3s;
+            white-space: nowrap;
         }
 
         .save-status.show {
@@ -570,6 +571,11 @@
             
             <div class="grants-section">
                 <h2>Grant Funding Received <span class="save-status" id="saveStatus">✓ Saved</span></h2>
+                
+                <div id="configNotice" style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin-bottom: 20px; font-size: 0.9em; color: #856404;">
+                    <strong>⚙️ Configuration needed:</strong> To enable Google Sheets sync, replace <code>YOUR_GOOGLE_SCRIPT_URL_HERE</code> in the code with your Google Apps Script Web App URL.
+                    <br><small>Currently using local browser storage as backup.</small>
+                </div>
                 <button class="add-grant" onclick="addGrant()">+ Add New Grant</button>
                 
                 <table class="grants-table">
@@ -596,6 +602,9 @@
     </div>
 
     <script>
+        // Google Sheets Configuration
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/a/macros/umich.edu/s/AKfycbz9DEmCQug1d4ROd7bYw1FhP7vakl29XNnxCRsgp5LO2KPbTbaNpwetAycmqOIqfjul/exec'; // Replace with your actual URL
+        
         function formatCurrency(amount) {
             return new Intl.NumberFormat('en-US', {
                 style: 'currency',
@@ -605,7 +614,48 @@
             }).format(amount);
         }
 
-        function saveData() {
+        async function saveData() {
+            if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_SCRIPT_URL_HERE') {
+                console.log('Google Sheets not configured, using local storage');
+                saveDataLocal();
+                return;
+            }
+
+            const goalAmount = document.getElementById('goalAmount').value;
+            const grants = Array.from(document.querySelectorAll('#grantsTableBody tr')).map(row => ({
+                name: row.querySelector('.grant-name').value,
+                amount: parseFloat(row.querySelector('.grant-amount').value) || 0
+            })).filter(grant => grant.name || grant.amount); // Only save non-empty grants
+            
+            const data = {
+                goal: goalAmount,
+                grants: grants
+            };
+            
+            try {
+                showSaveStatus('Saving...', '#f39c12');
+                
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    showSaveStatus('✓ Saved to Google Sheets', '#27ae60');
+                } else {
+                    throw new Error('Save failed');
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+                showSaveStatus('⚠ Save failed - using local backup', '#e74c3c');
+                saveDataLocal(); // Fallback to local storage
+            }
+        }
+
+        function saveDataLocal() {
             const goalAmount = document.getElementById('goalAmount').value;
             const grants = Array.from(document.querySelectorAll('#grantsTableBody tr')).map(row => ({
                 name: row.querySelector('.grant-name').value,
@@ -619,16 +669,53 @@
             };
             
             localStorage.setItem('tewariLabFunding', JSON.stringify(data));
-            
-            // Show save status
-            const saveStatus = document.getElementById('saveStatus');
-            if (saveStatus) {
-                saveStatus.classList.add('show');
-                setTimeout(() => saveStatus.classList.remove('show'), 2000);
+            showSaveStatus('✓ Saved locally', '#27ae60');
+        }
+
+        async function loadData() {
+            if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_SCRIPT_URL_HERE') {
+                console.log('Google Sheets not configured, using local storage');
+                loadDataLocal();
+                return;
+            }
+
+            try {
+                showSaveStatus('Loading from Google Sheets...', '#3498db');
+                
+                const response = await fetch(GOOGLE_SCRIPT_URL);
+                const data = await response.json();
+                
+                // Load goal
+                document.getElementById('goalAmount').value = data.goal || 100000;
+                
+                // Clear existing grants
+                const tableBody = document.getElementById('grantsTableBody');
+                tableBody.innerHTML = '';
+                
+                // Load grants
+                if (data.grants && data.grants.length > 0) {
+                    data.grants.forEach(grant => {
+                        if (grant.name || grant.amount) {
+                            addGrantRow(grant.name, grant.amount);
+                        }
+                    });
+                } else {
+                    // Add sample data if no grants exist
+                    addGrantRow('NSF Research Grant', 45000);
+                    addGrantRow('University Seed Fund', 15000);
+                }
+                
+                updateThermometer();
+                showSaveStatus('✓ Loaded from Google Sheets', '#27ae60');
+                
+            } catch (error) {
+                console.error('Load error:', error);
+                showSaveStatus('⚠ Could not load from Google Sheets - using local data', '#e74c3c');
+                loadDataLocal(); // Fallback to local storage
             }
         }
 
-        function loadData() {
+        function loadDataLocal() {
             const saved = localStorage.getItem('tewariLabFunding');
             if (saved) {
                 const data = JSON.parse(saved);
@@ -647,24 +734,27 @@
                     }
                 });
                 
-                // If no grants loaded, add sample data
-                if (data.grants.length === 0) {
-                    addGrantRow('NSF Research Grant', 45000);
-                    addGrantRow('University Seed Fund', 15000);
-                }
-                
                 updateThermometer();
-                
-                // Show last updated info
-                if (data.lastUpdated) {
-                    const date = new Date(data.lastUpdated);
-                    console.log('Data last updated:', date.toLocaleString());
-                }
+                showSaveStatus('✓ Loaded from local storage', '#f39c12');
             } else {
                 // First time - load sample data
                 addGrantRow('NSF Research Grant', 45000);
                 addGrantRow('University Seed Fund', 15000);
                 updateThermometer();
+            }
+        }
+
+        function showSaveStatus(message, color) {
+            const saveStatus = document.getElementById('saveStatus');
+            if (saveStatus) {
+                saveStatus.textContent = message;
+                saveStatus.style.color = color;
+                saveStatus.classList.add('show');
+                setTimeout(() => {
+                    if (saveStatus.textContent === message) {
+                        saveStatus.classList.remove('show');
+                    }
+                }, 3000);
             }
         }
 
@@ -725,6 +815,12 @@
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
+            // Hide config notice if Google Sheets is configured
+            if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== 'YOUR_GOOGLE_SCRIPT_URL_HERE') {
+                const notice = document.getElementById('configNotice');
+                if (notice) notice.style.display = 'none';
+            }
+            
             loadData();
         });
 
