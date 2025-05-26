@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 Funding Thermometer - Tewari Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Varela Round', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 400;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            font-weight: 400;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 40px;
+            padding: 40px;
+        }
+
+        .thermometer-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .goal-input {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .goal-input label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .goal-input input {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            width: 200px;
+            text-align: center;
+            font-size: 1.1em;
+            transition: border-color 0.3s;
+        }
+
+        .goal-input input:focus {
+            outline: none;
+            border-color: #f39c12;
+            box-shadow: 0 0 10px rgba(243,156,18,0.3);
+        }
+
+        .thermometer-wrapper {
+            position: relative;
+            width: 140px;
+            height: 600px;
+            margin: 20px 0;
+        }
+
+        /* Festive GOAL banner */
+        .goal-banner {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 40px;
+            background: 
+                /* Glitter particles - same as mercury */
+                radial-gradient(circle at 15% 20%, rgba(255,255,255,0.9) 1px, transparent 2px),
+                radial-gradient(circle at 85% 40%, rgba(255,255,255,0.8) 1.2px, transparent 2px),
+                radial-gradient(circle at 35% 70%, rgba(255,255,255,0.7) 0.8px, transparent 1.5px),
+                radial-gradient(circle at 75% 85%, rgba(255,255,255,0.9) 1px, transparent 2px),
+                radial-gradient(circle at 25% 60%, rgba(255,255,255,0.8) 0.6px, transparent 1px),
+                radial-gradient(circle at 65% 25%, rgba(255,255,255,0.7) 0.8px, transparent 1.2px),
+                radial-gradient(circle at 45% 45%, rgba(255,255,255,0.9) 0.5px, transparent 1px),
+                radial-gradient(circle at 90% 70%, rgba(255,255,255,0.6) 0.7px, transparent 1px),
+                /* Base gold gradient */
+                linear-gradient(45deg, 
+                    #b8860b 0%,
+                    #d4af37 15%, 
+                    #ffd700 40%, 
+                    #ffed4e 60%, 
+                    #ffd700 80%, 
+                    #daa520 100%
+                );
+            background-size: 
+                20px 20px, 18px 18px, 15px 15px, 22px 22px,
+                12px 12px, 16px 16px, 10px 10px, 14px 14px,
+                100% 100%;
+            border-radius: 20px;
+            border: 2px solid #2c3e50;
+            box-shadow: 
+                inset 0 2px 8px rgba(255,255,255,0.3),
+                0 4px 15px rgba(255,215,0,0.4),
+                0 0 20px rgba(255,215,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: #2c3e50;
+            text-shadow: 
+                1px 1px 2px rgba(255,255,255,0.8),
+                0 0 10px rgba(255,255,255,0.6);
+            animation: bannerSparkle 3s infinite ease-in-out, bannerBounce 2s infinite ease-in-out;
+            z-index: 10;
+        }
+
+        /* Banner animations */
+        @keyframes bannerSparkle {
+            0%, 100% { 
+                background-position: 
+                    0px 0px, 5px 5px, 10px 10px, 15px 15px,
+                    3px 8px, 12px 2px, 7px 12px, 18px 6px,
+                    0 0;
+            }
+            50% { 
+                background-position: 
+                    10px 10px, 15px 2px, 3px 18px, 20px 10px,
+                    13px 18px, 17px 7px, 2px 17px, 23px 11px,
+                    0 0;
+            }
+        }
+
+        @keyframes bannerBounce {
+            0%, 100% { 
+                transform: translateX(-50%) scale(1);
+            }
+            50% { 
+                transform: translateX(-50%) scale(1.05);
+            }
+        }
+
+        /* Thermometer outline */
+        .thermometer-outline {
+            position: absolute;
+            left: 50%;
+            top: 60px;
+            transform: translateX(-50%);
+            width: 42px;
+            height: 480px;
+            border: 3px solid #2c3e50;
+            border-radius: 21px 21px 50px 50px;
+            background: linear-gradient(90deg, 
+                rgba(255,255,255,0.9) 0%, 
+                rgba(240,248,255,0.8) 50%, 
+                rgba(230,240,250,0.7) 100%
+            );
+            box-shadow: 
+                inset 2px 0 6px rgba(255,255,255,0.4),
+                inset -2px 0 6px rgba(0,0,0,0.1),
+                2px 2px 12px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+
+        /* Glass highlight effect */
+        .thermometer-outline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 3px;
+            width: 5px;
+            height: 85%;
+            background: linear-gradient(180deg, 
+                rgba(255,255,255,0.8) 0%, 
+                rgba(255,255,255,0.4) 50%, 
+                rgba(255,255,255,0.2) 100%
+            );
+            border-radius: 8px;
+        }
+
+        /* Glittery gold mercury */
+        .mercury {
+            position: absolute;
+            bottom: 3px;
+            left: 3px;
+            right: 3px;
+            width: calc(100% - 6px);
+            background: 
+                /* Glitter particles - large */
+                radial-gradient(circle at 15% 20%, rgba(255,255,255,0.9) 1px, transparent 2px),
+                radial-gradient(circle at 85% 40%, rgba(255,255,255,0.8) 1.2px, transparent 2px),
+                radial-gradient(circle at 35% 70%, rgba(255,255,255,0.7) 0.8px, transparent 1.5px),
+                radial-gradient(circle at 75% 85%, rgba(255,255,255,0.9) 1px, transparent 2px),
+                /* Glitter particles - medium */
+                radial-gradient(circle at 25% 60%, rgba(255,255,255,0.8) 0.6px, transparent 1px),
+                radial-gradient(circle at 65% 25%, rgba(255,255,255,0.7) 0.8px, transparent 1.2px),
+                radial-gradient(circle at 45% 45%, rgba(255,255,255,0.9) 0.5px, transparent 1px),
+                radial-gradient(circle at 90% 70%, rgba(255,255,255,0.6) 0.7px, transparent 1px),
+                /* Glitter particles - small */
+                radial-gradient(circle at 10% 80%, rgba(255,255,255,0.8) 0.4px, transparent 0.8px),
+                radial-gradient(circle at 80% 10%, rgba(255,255,255,0.7) 0.3px, transparent 0.6px),
+                radial-gradient(circle at 55% 90%, rgba(255,255,255,0.9) 0.4px, transparent 0.8px),
+                /* Base gold gradient */
+                linear-gradient(0deg, 
+                    #b8860b 0%,
+                    #d4af37 15%, 
+                    #ffd700 40%, 
+                    #ffed4e 60%, 
+                    #ffd700 80%, 
+                    #daa520 100%
+                );
+            background-size: 
+                20px 20px, 18px 18px, 15px 15px, 22px 22px,
+                12px 12px, 16px 16px, 10px 10px, 14px 14px,
+                8px 8px, 9px 9px, 11px 11px,
+                100% 100%;
+            border-radius: 18px 18px 47px 47px;
+            transition: height 2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 
+                inset 1px 0 4px rgba(0,0,0,0.15),
+                inset -1px 0 4px rgba(0,0,0,0.15),
+                inset 0 2px 8px rgba(255,255,255,0.3),
+                0 0 15px rgba(255,215,0,0.4);
+            animation: sparkleMovement 4s infinite ease-in-out;
+        }
+
+        /* Mercury surface shimmer */
+        .mercury::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: 
+                linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%),
+                radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6) 0.5px, transparent 1px),
+                radial-gradient(circle at 70% 70%, rgba(255,255,255,0.5) 0.8px, transparent 1.2px);
+            background-size: 200% 200%, 15px 15px, 20px 20px;
+            animation: surfaceShimmer 3s infinite, glitterTwinkle 2s infinite alternate;
+        }
+
+        /* Additional sparkle layer */
+        .mercury::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 40% 20%, rgba(255,255,255,0.9) 0.3px, transparent 0.8px),
+                radial-gradient(circle at 20% 80%, rgba(255,255,255,0.7) 0.5px, transparent 1px),
+                radial-gradient(circle at 80% 50%, rgba(255,255,255,0.8) 0.4px, transparent 0.9px),
+                radial-gradient(circle at 60% 90%, rgba(255,255,255,0.6) 0.6px, transparent 1.1px);
+            background-size: 25px 25px, 18px 18px, 30px 30px, 22px 22px;
+            animation: extraSparkles 5s infinite;
+        }
+
+        /* Display info */
+        .info {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .percentage {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .amount-display {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+        }
+
+        .current-amount {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .grants-section {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .grants-section h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            font-weight: 300;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: space-between;
+        }
+
+        .grants-section h2::before {
+            content: '📊';
+            font-size: 0.8em;
+        }
+
+        .save-status {
+            font-size: 0.7em;
+            color: #27ae60;
+            font-weight: 400;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .save-status.show {
+            opacity: 1;
+        }
+
+        .add-grant {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-bottom: 25px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .add-grant:hover {
+            background: linear-gradient(45deg, #229954, #27ae60);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+        }
+
+        .grants-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .grants-table th {
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .grants-table td {
+            padding: 15px;
+            border-bottom: 1px solid #ecf0f1;
+            transition: background-color 0.3s;
+        }
+
+        .grants-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .grants-table input {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 6px;
+            width: 100%;
+            transition: border-color 0.3s;
+            font-size: 1em;
+        }
+
+        .grants-table input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+        }
+
+        .delete-btn {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .delete-btn:hover {
+            background: linear-gradient(45deg, #c0392b, #a93226);
+            transform: translateY(-1px);
+        }
+
+        .total-row {
+            background: linear-gradient(135deg, #f39c12, #e67e22) !important;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .total-row td {
+            border-bottom: none;
+            padding: 18px 15px;
+        }
+
+        .total-row:hover {
+            background: linear-gradient(135deg, #f39c12, #e67e22) !important;
+        }
+
+        /* Animations */
+        @keyframes sparkleMovement {
+            0%, 100% { 
+                background-position: 
+                    0px 0px, 5px 5px, 10px 10px, 15px 15px,
+                    3px 8px, 12px 2px, 7px 12px, 18px 6px,
+                    2px 15px, 14px 4px, 9px 18px,
+                    0 0;
+            }
+            25% { 
+                background-position: 
+                    5px 5px, 15px 2px, 3px 18px, 20px 10px,
+                    8px 13px, 17px 7px, 2px 17px, 23px 11px,
+                    7px 20px, 19px 9px, 14px 23px,
+                    0 0;
+            }
+            50% { 
+                background-position: 
+                    10px 10px, 25px 7px, 8px 23px, 25px 15px,
+                    13px 18px, 22px 12px, 7px 22px, 28px 16px,
+                    12px 25px, 24px 14px, 19px 28px,
+                    0 0;
+            }
+            75% { 
+                background-position: 
+                    15px 15px, 35px 12px, 13px 28px, 30px 20px,
+                    18px 23px, 27px 17px, 12px 27px, 33px 21px,
+                    17px 30px, 29px 19px, 24px 33px,
+                    0 0;
+            }
+        }
+
+        @keyframes surfaceShimmer {
+            0% { background-position: -200% -200%, 0 0, 0 0; }
+            100% { background-position: 200% 200%, 15px 15px, 20px 20px; }
+        }
+
+        @keyframes glitterTwinkle {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes extraSparkles {
+            0%, 100% { 
+                background-position: 0px 0px, 8px 8px, 16px 4px, 4px 12px;
+                opacity: 0.8;
+            }
+            25% { 
+                background-position: 6px 6px, 14px 2px, 10px 10px, 18px 6px;
+                opacity: 1;
+            }
+            50% { 
+                background-position: 12px 12px, 20px 8px, 4px 16px, 12px 0px;
+                opacity: 0.9;
+            }
+            75% { 
+                background-position: 18px 18px, 26px 14px, 10px 22px, 6px 6px;
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .thermometer-wrapper {
+                transform: scale(0.8);
+            }
+
+            .grants-table {
+                font-size: 0.9em;
+            }
+
+            .grants-table th,
+            .grants-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 2025 Funding Thermometer 💰</h1>
+            <p>Tewari Lab</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="thermometer-section">
+                <div class="goal-input">
+                    <label for="goalAmount">🎯 Funding Goal ($)</label>
+                    <input type="number" id="goalAmount" value="100000" min="1">
+                </div>
+                
+                <div class="thermometer-wrapper">
+                    <div class="goal-banner">🎉 GOAL!! 🎉</div>
+                    <div class="thermometer-outline">
+                        <div class="mercury" id="mercury"></div>
+                    </div>
+                </div>
+
+                <div class="info">
+                    <div class="percentage" id="percentage">60%</div>
+                    <div class="amount-display">
+                        <div class="current-amount" id="currentAmount">$60,000</div>
+                        <div>of <span id="goalDisplay">$100,000</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grants-section">
+                <h2>Grant Funding Received <span class="save-status" id="saveStatus">✓ Saved</span></h2>
+                <button class="add-grant" onclick="addGrant()">+ Add New Grant</button>
+                
+                <table class="grants-table">
+                    <thead>
+                        <tr>
+                            <th>Grant Name</th>
+                            <th>Amount ($)</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="grantsTableBody">
+                        <!-- Grants will be loaded dynamically -->
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td><strong>💰 Total Funding</strong></td>
+                            <td><strong id="totalAmount">$60,000</strong></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function saveData() {
+            const goalAmount = document.getElementById('goalAmount').value;
+            const grants = Array.from(document.querySelectorAll('#grantsTableBody tr')).map(row => ({
+                name: row.querySelector('.grant-name').value,
+                amount: parseFloat(row.querySelector('.grant-amount').value) || 0
+            }));
+            
+            const data = {
+                goal: goalAmount,
+                grants: grants,
+                lastUpdated: new Date().toISOString()
+            };
+            
+            localStorage.setItem('tewariLabFunding', JSON.stringify(data));
+            
+            // Show save status
+            const saveStatus = document.getElementById('saveStatus');
+            if (saveStatus) {
+                saveStatus.classList.add('show');
+                setTimeout(() => saveStatus.classList.remove('show'), 2000);
+            }
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('tewariLabFunding');
+            if (saved) {
+                const data = JSON.parse(saved);
+                
+                // Load goal
+                document.getElementById('goalAmount').value = data.goal || 100000;
+                
+                // Clear existing grants
+                const tableBody = document.getElementById('grantsTableBody');
+                tableBody.innerHTML = '';
+                
+                // Load grants
+                data.grants.forEach(grant => {
+                    if (grant.name || grant.amount) {
+                        addGrantRow(grant.name, grant.amount);
+                    }
+                });
+                
+                // If no grants loaded, add sample data
+                if (data.grants.length === 0) {
+                    addGrantRow('NSF Research Grant', 45000);
+                    addGrantRow('University Seed Fund', 15000);
+                }
+                
+                updateThermometer();
+                
+                // Show last updated info
+                if (data.lastUpdated) {
+                    const date = new Date(data.lastUpdated);
+                    console.log('Data last updated:', date.toLocaleString());
+                }
+            } else {
+                // First time - load sample data
+                addGrantRow('NSF Research Grant', 45000);
+                addGrantRow('University Seed Fund', 15000);
+                updateThermometer();
+            }
+        }
+
+        function addGrantRow(name = '', amount = 0) {
+            const tableBody = document.getElementById('grantsTableBody');
+            const newRow = document.createElement('tr');
+            
+            newRow.innerHTML = `
+                <td><input type="text" class="grant-name" value="${name}" placeholder="Enter grant name" onchange="updateThermometer(); saveData()"></td>
+                <td><input type="number" class="grant-amount" value="${amount || ''}" placeholder="0" min="0" onchange="updateThermometer(); saveData()"></td>
+                <td><button class="delete-btn" onclick="deleteGrant(this)">Delete</button></td>
+            `;
+            
+            tableBody.appendChild(newRow);
+            return newRow;
+        }
+
+        function updateThermometer() {
+            const goalAmount = parseFloat(document.getElementById('goalAmount').value) || 100000;
+            
+            // Calculate total from table inputs
+            const grantAmounts = Array.from(document.querySelectorAll('.grant-amount'))
+                .map(input => parseFloat(input.value) || 0);
+            
+            const totalAmount = grantAmounts.reduce((sum, amount) => sum + amount, 0);
+            const percentage = Math.min((totalAmount / goalAmount) * 100, 100);
+            
+            // Update thermometer fill
+            const mercury = document.getElementById('mercury');
+            mercury.style.height = percentage + '%';
+            
+            // Update displays
+            document.getElementById('percentage').textContent = Math.round(percentage) + '%';
+            document.getElementById('currentAmount').textContent = formatCurrency(totalAmount);
+            document.getElementById('goalDisplay').textContent = formatCurrency(goalAmount);
+            document.getElementById('totalAmount').textContent = formatCurrency(totalAmount);
+        }
+
+        function addGrant() {
+            const newRow = addGrantRow('', 0);
+            // Focus on the new grant name input
+            newRow.querySelector('.grant-name').focus();
+            saveData();
+        }
+
+        function deleteGrant(button) {
+            const row = button.closest('tr');
+            row.remove();
+            updateThermometer();
+            saveData();
+        }
+
+        // Event listeners
+        document.getElementById('goalAmount').addEventListener('input', function() {
+            updateThermometer();
+            saveData();
+        });
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+        });
+
+        // Add smooth animations when page loads
+        window.addEventListener('load', function() {
+            setTimeout(updateThermometer, 500);
+        });
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                addGrant();
+            }
+        });
+
+        // Auto-save when page closes
+        window.addEventListener('beforeunload', function() {
+            saveData();
+        });
+    </script>
+</body>
+</html>
